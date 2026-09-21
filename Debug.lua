@@ -42,8 +42,8 @@ function Debug.BuildText()
         add("context: none (not reminder content)")
     end
     local ev = ns.Reminder.lastEvaluation
-    add("last reminder check: %s", ev and string.format("%s -> %s (%.0fs ago)", ev.trigger, ev.reason,
-        GetTime() - ev.at) or "none")
+    add("last reminder check: %s", ev and string.format("%s -> %s (%.0fs ago) [%s]", ev.trigger, ev.reason,
+        GetTime() - ev.at, tostring(ev.snapshot)) or "none")
     local settings = {}
     for k, v in pairs(ns.Store.db.settings) do settings[#settings + 1] = k .. "=" .. tostring(v) end
     table.sort(settings)

@@ -18,6 +18,13 @@ Changed:
   (it used to say "off" even when "All dungeons" was saved), and every option
   names the build it currently points at.
 
+Fixed:
+
+- Entering a delve could miss the reminder: the game had not reported the delve
+  yet when the check ran, 3 seconds after loading. The check now retries at 8 and
+  15 seconds until the content is recognised, and /sqt debug records what the
+  game reported at each attempt.
+
 
 V0.3
 ----

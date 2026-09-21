@@ -120,10 +120,25 @@ end
 
 Reminder.lastEvaluation = nil -- { trigger, reason, at } for /sqt debug
 
-function Reminder.Check(trigger)
+-- What GetInstanceInfo said at the time, for the debug dump: a miss is only
+-- diagnosable if we know what the game was reporting when we looked.
+local function InstanceSnapshot()
+    local _, instanceType, difficultyID = GetInstanceInfo()
+    local delve = C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress()
+    return string.format("type=%s diff=%s delve=%s", tostring(instanceType), tostring(difficultyID),
+        tostring(delve))
+end
+
+-- Returns the reason (nil when the popup was shown / queued).
+function Reminder.Check(trigger, attempt)
     local data, reason = Reminder.Evaluate(trigger)
-    Reminder.lastEvaluation = { trigger = trigger, reason = reason or "shown", at = GetTime() }
-    if not data then return end
+    Reminder.lastEvaluation = {
+        trigger = attempt and string.format("%s #%d", trigger, attempt) or trigger,
+        reason = reason or "shown",
+        at = GetTime(),
+        snapshot = InstanceSnapshot(),
+    }
+    if not data then return reason end
     ns.RunOutOfCombat("reminder", function()
         -- Re-evaluate: the situation may have changed during combat.
         local fresh = Reminder.Evaluate(trigger)
@@ -138,10 +153,25 @@ end
 -- ---------------------------------------------------------------------------
 -- Triggers
 -- ---------------------------------------------------------------------------
+-- Instance info settles some time after the loading screen, and how long
+-- varies: a delve still read as "not relevant content" 3s in. So retry until
+-- the game reports content we care about, then stop -- whatever the decision,
+-- one decision per entry. A newer load cancels an older chain.
+local ENTER_DELAYS = { 3, 8, 15 }
+local enterToken = 0
+
 ns.On("PLAYER_ENTERING_WORLD", function()
     if not ns.Store.Setting("remindOnEnter") then return end
-    -- Instance info and the talent config both settle a moment after loading.
-    C_Timer.After(3, function() Reminder.Check("enter") end)
+    enterToken = enterToken + 1
+    local token = enterToken
+    local function Attempt(i)
+        if token ~= enterToken then return end
+        local reason = Reminder.Check("enter", i)
+        if reason == "not relevant content" and ENTER_DELAYS[i + 1] then
+            C_Timer.After(ENTER_DELAYS[i + 1] - ENTER_DELAYS[i], function() Attempt(i + 1) end)
+        end
+    end
+    C_Timer.After(ENTER_DELAYS[1], function() Attempt(1) end)
 end)
 
 ns.On("CHALLENGE_MODE_KEYSTONE_SLOTTED", function()
