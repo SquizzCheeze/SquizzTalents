@@ -30,7 +30,7 @@ read_globals = {
     -- Namespaces
     "C_AddOns", "C_ChallengeMode", "C_ClassTalents", "C_PartyInfo", "C_Spell", "C_SpellBook",
     "C_SpecializationInfo",
-    "C_Timer", "C_Traits", "Enum", "ExportUtil", "MenuUtil", "Settings",
+    "C_Timer", "C_Traits", "Enum", "EventRegistry", "ExportUtil", "MenuUtil", "Settings",
 
     -- Functions
     "CreateFrame", "GetBuildInfo", "GetInstanceInfo", "GetNormalizedRealmName",
@@ -41,5 +41,5 @@ read_globals = {
 
     -- Frames, fonts and constants
     "CANCEL", "CLOSE", "ChatFontNormal", "DELETE", "GameFontHighlight", "GameTooltip", "OKAY", "REMOVE",
-    "SAVE", "UIParent", "RAID_CLASS_COLORS", "SOUNDKIT", "PlaySound", "UnitClass",
+    "SAVE", "UIParent", "PlayerSpellsFrame", "RAID_CLASS_COLORS", "SOUNDKIT", "PlaySound", "UnitClass",
 }

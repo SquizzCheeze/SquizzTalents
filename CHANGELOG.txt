@@ -2,6 +2,19 @@ SquizzTalents - Changelog
 =========================
 
 
+V1.1
+----
+
+New:
+
+- The loadout window opens beside Blizzard's talent window: attached outside
+  its top-left corner, level with its top, and closing with it. When the talent
+  window is pushed against the left edge of the screen it attaches on the right
+  instead. Opened on its own (/sqt), it floats freely as before, and now
+  remembers where you dragged it. The reminder popup is unaffected. Switch it
+  off under Settings.
+
+
 V1.0 (2026-09-21)
 -----------------
 

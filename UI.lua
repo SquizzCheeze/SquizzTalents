@@ -380,10 +380,21 @@ local main -- the window, created on first use
 local function CreateMain()
     main = CreateFrame("Frame", "SquizzTalentsFrame", UIParent, "BackdropTemplate")
     main:SetSize(320, 200)
-    main:SetPoint("CENTER")
     StyleWindow(main, "SquizzTalents")
     main:Hide()
     tinsert(UISpecialFrames, "SquizzTalentsFrame") -- Escape closes it
+    UI.PlaceFree()
+    -- Free-floating position is remembered; while attached to Blizzard's
+    -- talent window the frame cannot be dragged (the anchor owns it).
+    main:SetScript("OnDragStart", function(self)
+        if not self.attached then self:StartMoving() end
+    end)
+    main:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        if self.attached then return end
+        local point, _, relPoint, x, y = self:GetPoint(1)
+        ns.Store.SetSetting("mainPos", { point, relPoint, x, y })
+    end)
 
     main.context = MakeText(main, "GameFontHighlightSmall")
     main.context:SetPoint("TOPLEFT", 10, -TOP)
@@ -499,6 +510,81 @@ end
 function UI.Toggle()
     if not main then CreateMain() end
     main:SetShown(not main:IsShown())
+end
+
+-- ---------------------------------------------------------------------------
+-- Attaching to Blizzard's talent window
+--
+-- Driven by the EventRegistry events Blizzard's own talent tab fires from its
+-- OnShow/OnHide ("PlayerSpellsFrame.TalentTab.Show"/".Hide"), so nothing hooks
+-- or touches their frame: we only anchor OUR frame to it. Callbacks run through
+-- securecallfunction, so an error here cannot break their tab.
+--
+-- The talent window is area "centerOrLeft": pushed against the left edge when
+-- another panel is open, where there is no room outside its left side. Then we
+-- attach on the right instead. Widths are compared in SCREEN pixels
+-- (size x effective scale): GetLeft/GetWidth are each frame's own scaled space,
+-- and mixing them drifts at any UI scale but 1.0.
+-- ---------------------------------------------------------------------------
+local GAP = 2
+
+-- Saved free position, or centre.
+function UI.PlaceFree()
+    if not main then return end
+    main:ClearAllPoints()
+    local pos = ns.Store.Setting("mainPos")
+    if type(pos) == "table" and pos[1] then
+        main:SetPoint(pos[1], UIParent, pos[2], pos[3], pos[4])
+    else
+        main:SetPoint("CENTER")
+    end
+end
+
+local function AttachToTalents()
+    local talents = PlayerSpellsFrame
+    if not talents or not ns.Store.Setting("attachToTalents") then return end
+    if not main then CreateMain() end
+    local roomLeft = (talents:GetLeft() or 0) * talents:GetEffectiveScale()
+    local needed = (main:GetWidth() + GAP) * main:GetEffectiveScale()
+    main:ClearAllPoints()
+    if roomLeft >= needed then
+        main:SetPoint("TOPRIGHT", talents, "TOPLEFT", -GAP, 0)
+    else
+        main:SetPoint("TOPLEFT", talents, "TOPRIGHT", GAP, 0)
+    end
+    main.attached = true
+    if not main:IsShown() then
+        main.autoShown = true
+        main:Show()
+    end
+end
+
+local function DetachFromTalents()
+    if not main or not main.attached then return end
+    main.attached = false
+    if main.autoShown then main:Hide() end
+    main.autoShown = false
+    UI.PlaceFree()
+end
+
+EventRegistry:RegisterCallback("PlayerSpellsFrame.TalentTab.Show", function()
+    AttachToTalents()
+    -- The UI panel manager may still be positioning the window this frame;
+    -- choose the side again once it has settled.
+    C_Timer.After(0, function()
+        if main and main.attached then AttachToTalents() end
+    end)
+end, UI)
+EventRegistry:RegisterCallback("PlayerSpellsFrame.TalentTab.Hide", DetachFromTalents, UI)
+
+-- Turning the setting off while attached lets go immediately.
+function UI.SetAttachToTalents(on)
+    ns.Store.SetSetting("attachToTalents", on)
+    if on then
+        if PlayerSpellsFrame and PlayerSpellsFrame:IsShown() then AttachToTalents() end
+    else
+        DetachFromTalents()
+    end
 end
 
 -- ---------------------------------------------------------------------------

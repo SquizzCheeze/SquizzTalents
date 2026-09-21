@@ -12,6 +12,8 @@ local TOGGLES = {
     { key = "remindOnKeystone", label = L["Remind when a keystone is slotted"] },
     { key = "remindOnReadyCheck", label = L["Remind on ready check"] },
     { key = "remindUnmapped", label = L["Also remind in content that has no build chosen yet"] },
+    { key = "attachToTalents", label = L["Open the loadout window beside Blizzard's talent window"],
+        apply = function(on) ns.UI.SetAttachToTalents(on) end },
 }
 
 local panel, category, checkboxes, mappingRows = nil, nil, {}, {}
@@ -71,7 +73,9 @@ local function Build()
 
     local prev = title
     for i, t in ipairs(TOGGLES) do
-        local cb = S.Toggle(panel, t.label, function(on) ns.Store.SetSetting(t.key, on) end)
+        local cb = S.Toggle(panel, t.label, function(on)
+            if t.apply then t.apply(on) else ns.Store.SetSetting(t.key, on) end
+        end)
         cb:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, i == 1 and -16 or -10)
         checkboxes[t.key] = cb
         prev = cb

@@ -9,7 +9,8 @@
 --           blizzMeta = { [configID] = { tags = {}, icon } },
 --           mappings  = { [specID] = { [contextKey] = { entryID, label } } },
 --       } },
---       settings = { remindOnEnter, remindOnKeystone, remindOnReadyCheck, remindUnmapped },
+--       settings = { remindOnEnter, remindOnKeystone, remindOnReadyCheck, remindUnmapped,
+--                    attachToTalents, mainPos = { point, relPoint, x, y } },
 --   }
 -- Mappings are per character AND spec: they point at entry ids, and a
 -- "blizz:<configID>" id only means something to the character that owns it.
@@ -49,6 +50,7 @@ Store.DEFAULT_SETTINGS = {
     remindOnKeystone = true,
     remindOnReadyCheck = true,
     remindUnmapped = false, -- also prompt in content with no mapping yet
+    attachToTalents = true, -- open the loadout window beside Blizzard's talent tab
 }
 
 function Store.Init()

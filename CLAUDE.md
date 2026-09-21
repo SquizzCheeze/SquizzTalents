@@ -90,7 +90,8 @@ SquizzTalentsDB = {
   chars    = { ["Name-Realm"] = {
       blizzMeta = { [configID] = { tags, icon } },
       mappings  = { [specID] = { [contextKey] = { entryID, label } } } } },
-  settings = { remindOnEnter, remindOnKeystone, remindOnReadyCheck, remindUnmapped },
+  settings = { remindOnEnter, remindOnKeystone, remindOnReadyCheck, remindUnmapped,
+               attachToTalents, mainPos = { point, relPoint, x, y } },
 }
 ```
 
@@ -192,6 +193,21 @@ and friends. A `S.Button` tooltip goes in `button.tooltipFunc`, **not** an
 choice for now: `WowStyle1DropdownTemplate` dropdowns, `MenuUtil` context menus,
 StaticPopups. Semantic colours stay: gold = Suggested, red = Outdated, blue =
 Blizzard loadout; Active uses the accent.
+
+### Attaching to Blizzard's talent window (UI.lua)
+
+The main window attaches outside the talent window's top-left (right side when
+there's no room) while Blizzard's talent tab is shown. It is driven **only** by the
+`EventRegistry` events their tab fires itself — `"PlayerSpellsFrame.TalentTab.Show"`
+/ `".Hide"` from `ClassTalentsFrameMixin:OnShow/OnHide` — so nothing hooks or
+modifies their frame; we just anchor ours to `PlayerSpellsFrame`. The talent
+window is `area = "centerOrLeft"`, so the room check compares **screen pixels**
+(`GetLeft() * GetEffectiveScale()` vs our width × scale), never raw `GetLeft`
+against our width (see SquizzFrames' coordinate-space notes). Dragging is
+disabled while attached; the free position is saved to `settings.mainPos`. A
+window the attach opened (`autoShown`) closes with the talent window; one the user
+had open stays open and returns to its free position. The reminder popup never
+attaches.
 
 ### Blizzard's talent window caches its loadout list
 
