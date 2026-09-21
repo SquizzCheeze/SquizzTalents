@@ -135,7 +135,7 @@ local function CreateRowList(container)
                 n = n + 1
                 local row = GetRow(n)
                 row.entry = e
-                row.icon:SetTexture(e.icon or 134400)
+                S.SetIcon(row.icon, e.icon)
                 local name = e.name or "?"
                 if e.duplicateName and not opts.hideDuplicates then
                     name = name .. " |cff888888(= " .. e.duplicateName .. ")|r"

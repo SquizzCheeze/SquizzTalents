@@ -48,6 +48,14 @@ local function BuildSpells()
             local node = C_Traits.GetNodeInfo(configID, nodeID)
             for _, entryID in ipairs(node and node.entryIDs or {}) do
                 local entry = C_Traits.GetEntryInfo(configID, entryID)
+                -- Hero spec choices carry a subTreeID instead of a spell, and
+                -- their icon is an atlas (as Blizzard's hero talent frame draws it).
+                if entry and entry.subTreeID then
+                    local sub = C_Traits.GetSubTreeInfo(configID, entry.subTreeID)
+                    if sub and sub.iconElementID and sub.name then
+                        AddNamed(list, seen, "atlas:" .. sub.iconElementID, sub.name)
+                    end
+                end
                 local def = entry and entry.definitionID and C_Traits.GetDefinitionInfo(entry.definitionID)
                 if def then
                     local spellID = def.spellID
@@ -164,7 +172,7 @@ local function Render()
         local item = items[first + i]
         button.item = item
         if item then
-            button.texture:SetTexture(item.icon)
+            ns.Style.SetIcon(button.texture, item.icon)
             button.selected:SetShown(item.icon == frame.current)
             button:Show()
         else
@@ -265,6 +273,8 @@ local function Build()
             GameTooltip:AddLine(item.name or L["Icon"], 1, 1, 1)
             if type(item.icon) == "number" then
                 GameTooltip:AddLine(L["Icon ID"] .. " " .. item.icon, 0.7, 0.7, 0.7)
+            elseif type(item.icon) == "string" and item.icon:sub(1, 6) == "atlas:" then
+                GameTooltip:AddLine(L["Hero talents"], 0.7, 0.7, 0.7)
             end
             GameTooltip:Show()
         end)

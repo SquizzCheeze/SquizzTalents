@@ -148,6 +148,18 @@ function S.Window(frame, titleText)
     frame.closeButton = close
 end
 
+-- Draw a build icon. Icons are a fileID, a texture path, or "atlas:<name>" --
+-- hero talent specs only exist as atlases (TraitSubTreeInfo.iconElementID).
+-- SetAtlas replaces the texcoords, so the icon crop is re-applied for files.
+function S.SetIcon(texture, icon)
+    if type(icon) == "string" and icon:sub(1, 6) == "atlas:" then
+        texture:SetAtlas(icon:sub(7))
+    else
+        texture:SetTexture(icon or 134400)
+        texture:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    end
+end
+
 -- Accent-tinted highlight for a clickable row or icon.
 function S.Highlight(button, alpha)
     local a = S.Accent()
