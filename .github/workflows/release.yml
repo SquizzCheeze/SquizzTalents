@@ -6,13 +6,12 @@ name: Package and release
 #   git tag -a v1.0 -m "V1.0"
 #   git push origin v1.0
 #
-# That builds the zip, uploads it to CurseForge (project ID read from
+# That builds the zip, uploads it to CurseForge (project 1705647, read from
 # ## X-Curse-Project-ID in the TOC) and attaches it to a GitHub release.
 #
-# NOT YET CONNECTED TO CURSEFORGE: the TOC has no X-Curse-Project-ID until the
-# project exists, and the CF_API_TOKEN secret must be added to THIS repo
-# (secrets are per repository). Without both, a tag still makes a GitHub
-# release but skips CurseForge -- silently, with a green run.
+# The CF_API_TOKEN secret must exist on THIS repo (secrets are per
+# repository). Without it a tag still makes a GitHub release but skips
+# CurseForge -- silently, with a green run.
 #
 # Run it from the Actions tab instead to do a dry run: it builds the zip,
 # uploads nothing anywhere, and leaves the file as a downloadable artifact so
@@ -83,7 +82,7 @@ jobs:
           # Provided by Actions automatically -- no secret to create.
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
-      # Watch for "CurseForge ID: <id> [token set]" in the packager output.
+      # Watch for "CurseForge ID: 1705647 [token set]" in the packager output.
       # That suffix is `${cf_token:+ [token set]}` -- NO suffix means the token
       # is empty, not that the line is just terse.
       - name: Show what the packager produced

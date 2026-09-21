@@ -2,6 +2,7 @@
 ## Title: SquizzTalents
 ## Notes: Talent loadout manager with content-aware reminders. /sqt
 ## Author: Squizz
+## X-Curse-Project-ID: 1705647
 ## Version: 1.0
 ## X-Flavor: Mainline
 ## SavedVariables: SquizzTalentsDB
