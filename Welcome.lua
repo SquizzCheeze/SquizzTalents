@@ -22,6 +22,8 @@ local RELEASE_NOTES = {
     ["1.0"] = {
         "First release. Your Blizzard loadouts and your own saved builds in one list, with no cap on how many "
             .. "you save. Click one to apply it.",
+        "Import and export Blizzard talent codes: save an imported build to SquizzTalents or as a new Blizzard "
+            .. "loadout, and export any build to share it.",
         "A reminder when you enter a dungeon, raid, delve or PvP instance, slot a keystone, or on a ready check -- "
             .. "only when your active build is not the one you chose for that content.",
         "Choose builds for content from the reminder or by right-clicking a build: one difficulty, the whole "

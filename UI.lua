@@ -377,6 +377,7 @@ local function OpenEntryMenu(owner, entry)
             end
         end
         root:CreateDivider()
+        root:CreateButton(L["Export code..."], function() ns.Transfer.Export(entry) end)
         root:CreateButton(L["Edit tags..."], function() UI.PromptTags(entry) end)
         root:CreateButton(L["Set icon..."], function() UI.PromptIcon(entry) end)
         if entry.source == "own" then
@@ -440,10 +441,16 @@ local function CreateMain()
     main.cleanup:Hide()
 
     main.save = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
-    main.save:SetSize(150, 22)
+    main.save:SetSize(140, 22)
     main.save:SetPoint("BOTTOMLEFT", 8, 8)
     main.save:SetText(L["Save current build"])
     main.save:SetScript("OnClick", UI.PromptSave)
+
+    main.import = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
+    main.import:SetSize(70, 22)
+    main.import:SetPoint("LEFT", main.save, "RIGHT", 4, 0)
+    main.import:SetText(L["Import"])
+    main.import:SetScript("OnClick", function() ns.Transfer.ShowImport() end)
 
     main.settings = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
     main.settings:SetSize(80, 22)

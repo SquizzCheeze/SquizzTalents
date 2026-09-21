@@ -73,18 +73,29 @@ local function HashEquals(a, b)
     return true
 end
 
+Apply.ReadHeader = ReadHeader
+Apply.HashIsEmpty = HashIsEmpty
+Apply.HashEquals = HashEquals
+
+-- Blizzard's ExtractValue returns nil once the string runs out, and callers
+-- would then do arithmetic on it; a truncated code must fail cleanly instead.
 local function ReadContent(stream, treeNodes)
     local results = {}
+    local function Bits(n)
+        local v = stream:ExtractValue(n)
+        if v == nil then error("truncated", 0) end
+        return v
+    end
     for i = 1, #treeNodes do
-        local r = { selected = stream:ExtractValue(1) == 1 }
+        local r = { selected = Bits(1) == 1 }
         if r.selected then
-            r.purchased = stream:ExtractValue(1) == 1
+            r.purchased = Bits(1) == 1
             if r.purchased then
-                if stream:ExtractValue(1) == 1 then
-                    r.partialRanks = stream:ExtractValue(BITS_RANKS)
+                if Bits(1) == 1 then
+                    r.partialRanks = Bits(BITS_RANKS)
                 end
-                if stream:ExtractValue(1) == 1 then
-                    r.choiceIndex = stream:ExtractValue(2) + 1 -- stored zero-based
+                if Bits(1) == 1 then
+                    r.choiceIndex = Bits(2) + 1 -- stored zero-based
                 end
             end
         end
@@ -92,6 +103,7 @@ local function ReadContent(stream, treeNodes)
     end
     return results
 end
+Apply.ReadContent = ReadContent
 
 -- Why a saved build can no longer be applied as saved, or nil if it still can.
 -- Header only (26 bytes), cheap enough to run on every render. Catches a talent
@@ -132,7 +144,8 @@ function Apply.Decode(importString, configID, treeID)
     end
 
     local treeNodes = C_Traits.GetTreeNodes(treeID)
-    local content = ReadContent(stream, treeNodes)
+    local okContent, content = pcall(ReadContent, stream, treeNodes)
+    if not okContent then return nil, L["Import string is incomplete"] end
     local targets = {}
     for i, nodeID in ipairs(treeNodes) do
         local r = content[i]

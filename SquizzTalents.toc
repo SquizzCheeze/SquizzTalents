@@ -14,6 +14,7 @@ Sources.lua
 Apply.lua
 Reminder.lua
 UI.lua
+ImportExport.lua
 Settings.lua
 Welcome.lua
 Debug.lua

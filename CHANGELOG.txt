@@ -20,6 +20,11 @@ Loadouts:
   this content, tags, icon, rename, delete. Blizzard loadouts can be deleted
   from here too (Blizzard's talent window only notices while it is open; if it
   still lists a deleted loadout, /reload).
+- Import and export with Blizzard's own talent codes, the same ones the talent
+  window and build sites use. Import a code into SquizzTalents (any spec of
+  your class) or as a new Blizzard loadout (current spec, within Blizzard's
+  loadout limit); the code is checked as you paste it. Export any build from
+  the right-click menu to share it.
 - Saved builds made on an older talent tree are marked Outdated, with the
   reason in the tooltip. Update to current talents refreshes one with your
   active talents and keeps its name, icon, tags and content mappings. Delete

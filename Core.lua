@@ -77,6 +77,8 @@ SlashCmdList.SQUIZZTALENTS = function(msg)
         end
     elseif cmd == "debug" then
         ns.Debug.Show()
+    elseif cmd == "import" then
+        ns.Transfer.ShowImport()
     elseif cmd == "notes" or cmd == "changelog" then
         ns.Welcome.ShowReleaseNotes()
     elseif cmd == "config" or cmd == "settings" then
@@ -105,6 +107,7 @@ SlashCmdList.SQUIZZTALENTS = function(msg)
         ns.Print(L["Commands:"])
         print("  /sqt  " .. L["- open the loadout window"])
         print("  /sqt save [name]  " .. L["- save the current build"])
+        print("  /sqt import  " .. L["- import a talent code"])
         print("  /sqt remind  " .. L["- run the reminder check now"])
         print("  /sqt config  " .. L["- open the settings"])
         print("  /sqt notes  " .. L["- show the release notes"])
