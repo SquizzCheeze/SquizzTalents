@@ -2,8 +2,8 @@ SquizzTalents - Changelog
 =========================
 
 
-V1.0
-----
+V1.0 (2026-09-21)
+-----------------
 
 First release.
 
