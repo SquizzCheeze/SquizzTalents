@@ -25,6 +25,10 @@ Loadouts:
   your class) or as a new Blizzard loadout (current spec, within Blizzard's
   loadout limit); the code is checked as you paste it. Export any build from
   the right-click menu to share it.
+- Icon picker for any build (right-click > Set icon): a grid of every icon
+  with a search box. Search talents and spells of your class by name, your
+  specs and this season's Mythic+ dungeons, or browse the full icon catalogue;
+  a spell ID or icon ID typed into the search finds that icon directly.
 - Saved builds made on an older talent tree are marked Outdated, with the
   reason in the tooltip. Update to current talents refreshes one with your
   active talents and keeps its name, icon, tags and content mappings. Delete

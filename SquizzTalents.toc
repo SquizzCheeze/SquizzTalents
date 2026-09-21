@@ -15,6 +15,7 @@ Apply.lua
 Reminder.lua
 UI.lua
 ImportExport.lua
+IconPicker.lua
 Settings.lua
 Welcome.lua
 Debug.lua

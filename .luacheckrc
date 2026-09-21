@@ -28,11 +28,13 @@ read_globals = {
     string = { fields = { "join" } },
 
     -- Namespaces
-    "C_AddOns", "C_ChallengeMode", "C_ClassTalents", "C_PartyInfo", "C_Spell", "C_SpecializationInfo",
+    "C_AddOns", "C_ChallengeMode", "C_ClassTalents", "C_PartyInfo", "C_Spell", "C_SpellBook",
+    "C_SpecializationInfo",
     "C_Timer", "C_Traits", "Enum", "ExportUtil", "MenuUtil", "Settings",
 
     -- Functions
     "CreateFrame", "GetBuildInfo", "GetInstanceInfo", "GetNormalizedRealmName",
+    "GetMacroIcons", "GetMacroItemIcons", "GetLooseMacroIcons", "GetLooseMacroItemIcons",
     "GetSpecializationInfoForSpecID", "GetTime", "InCombatLockdown",
     "StaticPopup_Show", "UnitFullName", "geterrorhandler", "time",
     "GameTooltip_Hide",

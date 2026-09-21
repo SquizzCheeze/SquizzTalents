@@ -325,24 +325,10 @@ function UI.PromptTags(entry)
         end)
 end
 
--- Accepts a spell name or ID (its icon is used) or a raw icon file ID.
--- Empty resets to the spec icon.
+-- Searchable icon grid (IconPicker.lua). Spell and icon IDs still work there:
+-- type the number into its search box.
 function UI.PromptIcon(entry)
-    PromptInput(string.format(L["Icon for \"%s\": spell name, spell ID or icon ID (empty = default):"],
-        entry.name), "", function(text)
-        text = strtrim(text or "")
-        if text == "" then
-            ns.Sources.SetIcon(entry, nil)
-            return
-        end
-        local icon = C_Spell.GetSpellTexture(tonumber(text) or text)
-        if not icon and tonumber(text) then icon = tonumber(text) end
-        if icon then
-            ns.Sources.SetIcon(entry, icon)
-        else
-            ns.Print(string.format(L["No spell or icon found for \"%s\"."], text))
-        end
-    end)
+    ns.IconPicker.Open(entry)
 end
 
 function UI.PromptRename(entry)
