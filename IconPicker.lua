@@ -16,7 +16,6 @@ local Picker = {}
 ns.IconPicker = Picker
 
 local COLS, ROWS, SIZE, GAP = 10, 7, 36, 4
-local WHITE8 = "Interface\\Buttons\\WHITE8x8"
 
 local CATEGORIES = {
     { key = "all", label = L["All"] },
@@ -198,36 +197,23 @@ local function Build()
     frame = CreateFrame("Frame", "SquizzTalentsIconPicker", UIParent, "BackdropTemplate")
     local gridW = COLS * SIZE + (COLS - 1) * GAP
     local gridH = ROWS * SIZE + (ROWS - 1) * GAP
-    frame:SetSize(gridW + 24, gridH + 132)
+    local S = ns.Style
+    frame:SetSize(gridW + 24, gridH + 128)
     frame:SetPoint("CENTER", 0, 40)
-    frame:SetFrameStrata("DIALOG")
+    S.Window(frame)
     frame:SetToplevel(true)
-    frame:SetBackdrop({ bgFile = WHITE8, edgeFile = WHITE8, edgeSize = 1 })
-    frame:SetBackdropColor(0.06, 0.06, 0.08, 0.97)
-    frame:SetBackdropBorderColor(0.2, 0.8, 0.6, 0.8)
-    frame:EnableMouse(true)
-    frame:SetMovable(true)
-    frame:SetClampedToScreen(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:Hide()
     tinsert(UISpecialFrames, "SquizzTalentsIconPicker")
 
-    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", 2, 2)
-
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    frame.title:SetPoint("TOPLEFT", 12, -12)
-    frame.title:SetPoint("RIGHT", -30, 0)
-    frame.title:SetJustifyH("LEFT")
-    frame.title:SetWordWrap(false)
-
-    frame.search = CreateFrame("EditBox", nil, frame, "SearchBoxTemplate")
-    frame.search:SetSize(gridW - 160, 22)
-    frame.search:SetPoint("TOPLEFT", 18, -40)
-    frame.search:SetAutoFocus(false)
-    frame.search:HookScript("OnTextChanged", Refilter)
+    frame.search = S.EditBox(frame, gridW - 158, 22)
+    frame.search:SetPoint("TOPLEFT", 12, -(S.TITLE_HEIGHT + 8))
+    frame.search:SetScript("OnTextChanged", function(self)
+        self.placeholder:SetShown(self:GetText() == "")
+        Refilter()
+    end)
+    frame.search.placeholder = frame.search:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.search.placeholder:SetPoint("LEFT", 7, 0)
+    frame.search.placeholder:SetText(L["Search: spell name, spell ID or icon ID"])
 
     frame.categoryDrop = CreateFrame("DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
     frame.categoryDrop:SetWidth(150)
@@ -243,7 +229,7 @@ local function Build()
 
     frame.grid = CreateFrame("Frame", nil, frame)
     frame.grid:SetSize(gridW, gridH)
-    frame.grid:SetPoint("TOPLEFT", 12, -72)
+    frame.grid:SetPoint("TOPLEFT", 12, -(S.TITLE_HEIGHT + 40))
     frame.grid:EnableMouseWheel(true)
     frame.grid:SetScript("OnMouseWheel", function(_, delta)
         frame.offset = frame.offset - delta
@@ -262,8 +248,9 @@ local function Build()
         b.selected = b:CreateTexture(nil, "OVERLAY")
         b.selected:SetPoint("TOPLEFT", -2, 2)
         b.selected:SetPoint("BOTTOMRIGHT", 2, -2)
-        b.selected:SetColorTexture(0.2, 1, 0.5, 0.35)
-        b:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+        local a = S.Accent()
+        b.selected:SetColorTexture(a.r, a.g, a.b, 0.55)
+        S.Highlight(b, 0.35)
         -- Mouse wheel over a button should still scroll the grid.
         b:EnableMouseWheel(true)
         b:SetScript("OnMouseWheel", function(_, delta)
@@ -288,16 +275,12 @@ local function Build()
     frame.count = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.count:SetPoint("TOPLEFT", frame.grid, "BOTTOMLEFT", 0, -8)
 
-    local reset = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    reset:SetSize(140, 22)
+    local reset = S.Button(frame, L["Use default icon"], 140, 22)
     reset:SetPoint("BOTTOMLEFT", 12, 12)
-    reset:SetText(L["Use default icon"])
     reset:SetScript("OnClick", function() Choose(nil) end)
 
-    local cancel = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    cancel:SetSize(90, 22)
+    local cancel = S.Button(frame, CANCEL, 90, 22)
     cancel:SetPoint("BOTTOMRIGHT", -12, 12)
-    cancel:SetText(CANCEL)
     cancel:SetScript("OnClick", function() frame:Hide() end)
 end
 

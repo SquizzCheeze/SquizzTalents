@@ -12,27 +12,16 @@ local STATUS_COLORS = {
     unconfirmed = "|cffffcc33", failed = "|cffff4444", blocked = "|cffff8844",
     error = "|cffff4444",
 }
-local WHITE8 = "Interface\\Buttons\\WHITE8x8"
+local S = ns.Style
+local TOP = S.TITLE_HEIGHT + 6 -- first content line, below the title bar
 
 local lastStatusLine = nil
 
 -- ---------------------------------------------------------------------------
 -- Shared pieces
 -- ---------------------------------------------------------------------------
-local function StyleWindow(f)
-    f:SetBackdrop({ bgFile = WHITE8, edgeFile = WHITE8, edgeSize = 1 })
-    f:SetBackdropColor(0.06, 0.06, 0.08, 0.95)
-    f:SetBackdropBorderColor(0.2, 0.8, 0.6, 0.8)
-    f:SetFrameStrata("DIALOG")
-    f:EnableMouse(true)
-    f:SetMovable(true)
-    f:SetClampedToScreen(true)
-    f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", f.StartMoving)
-    f:SetScript("OnDragStop", f.StopMovingOrSizing)
-    local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", 2, 2)
-    f.closeButton = close
+local function StyleWindow(f, title)
+    S.Window(f, title)
 end
 
 local function MakeText(parent, template)
@@ -112,7 +101,7 @@ local function CreateRowList(container)
 
         row.bg = row:CreateTexture(nil, "BACKGROUND")
         row.bg:SetAllPoints()
-        row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+        S.Highlight(row, 0.2)
 
         row.icon = row:CreateTexture(nil, "ARTWORK")
         row.icon:SetSize(ROW_HEIGHT - 4, ROW_HEIGHT - 4)
@@ -155,8 +144,9 @@ local function CreateRowList(container)
 
                 local suggested = opts.suggestedID and e.id == opts.suggestedID
                 if e.isActive then
-                    row.tag:SetText("|cff33ff66" .. L["Active"] .. "|r")
-                    row.bg:SetColorTexture(0.2, 1, 0.4, 0.12)
+                    local a = S.Accent()
+                    row.tag:SetText(S.AccentCode() .. L["Active"] .. "|r")
+                    row.bg:SetColorTexture(a.r, a.g, a.b, 0.18)
                 elseif e.staleReason then
                     row.tag:SetText("|cffff4444" .. L["Outdated"] .. "|r")
                     row.bg:SetColorTexture(1, 0.2, 0.2, suggested and 0.18 or 0.08)
@@ -165,8 +155,8 @@ local function CreateRowList(container)
                     row.bg:SetColorTexture(1, 0.82, 0, 0.16)
                 else
                     row.tag:SetText(e.source == "blizz" and ("|cff8888ff" .. L["Blizzard"] .. "|r")
-                        or ("|cff33cc99" .. L["Saved"] .. "|r"))
-                    row.bg:SetColorTexture(1, 1, 1, 0.04)
+                        or ("|cffaaaaaa" .. L["Saved"] .. "|r"))
+                    row.bg:SetColorTexture(S.PANEL[1], S.PANEL[2], S.PANEL[3], 1)
                 end
                 local dim = opts.blockReason and 0.5 or 1
                 row.name:SetTextColor(dim, dim, dim)
@@ -391,15 +381,12 @@ local function CreateMain()
     main = CreateFrame("Frame", "SquizzTalentsFrame", UIParent, "BackdropTemplate")
     main:SetSize(320, 200)
     main:SetPoint("CENTER")
-    StyleWindow(main)
+    StyleWindow(main, "SquizzTalents")
     main:Hide()
     tinsert(UISpecialFrames, "SquizzTalentsFrame") -- Escape closes it
 
-    main.title = MakeText(main, "GameFontNormal")
-    main.title:SetPoint("TOPLEFT", 10, -8)
-
     main.context = MakeText(main, "GameFontHighlightSmall")
-    main.context:SetPoint("TOPLEFT", 10, -26)
+    main.context:SetPoint("TOPLEFT", 10, -TOP)
     main.context:SetPoint("RIGHT", -10, 0)
     main.context:SetWordWrap(true)
 
@@ -414,8 +401,7 @@ local function CreateMain()
     main.block:SetPoint("RIGHT", -8, 0)
 
     -- Only shown while some saved builds for this spec are outdated.
-    main.cleanup = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
-    main.cleanup:SetSize(180, 22)
+    main.cleanup = S.Button(main, "", 180, 22, "red")
     main.cleanup:SetPoint("TOPLEFT", main.content, "BOTTOMLEFT", 0, -4)
     main.cleanup:SetScript("OnClick", function(self)
         local stale = self.stale or {}
@@ -426,22 +412,16 @@ local function CreateMain()
     end)
     main.cleanup:Hide()
 
-    main.save = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
-    main.save:SetSize(140, 22)
+    main.save = S.Button(main, L["Save current build"], 140, 22)
     main.save:SetPoint("BOTTOMLEFT", 8, 8)
-    main.save:SetText(L["Save current build"])
     main.save:SetScript("OnClick", UI.PromptSave)
 
-    main.import = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
-    main.import:SetSize(70, 22)
+    main.import = S.Button(main, L["Import"], 70, 22)
     main.import:SetPoint("LEFT", main.save, "RIGHT", 4, 0)
-    main.import:SetText(L["Import"])
     main.import:SetScript("OnClick", function() ns.Transfer.ShowImport() end)
 
-    main.settings = CreateFrame("Button", nil, main, "UIPanelButtonTemplate")
-    main.settings:SetSize(80, 22)
+    main.settings = S.Button(main, L["Settings"], 80, 22)
     main.settings:SetPoint("BOTTOMRIGHT", -8, 8)
-    main.settings:SetText(L["Settings"])
     main.settings:SetScript("OnClick", function() ns.Settings.Open() end)
 
     main.status = MakeText(main, "GameFontHighlightSmall")
@@ -460,7 +440,7 @@ local function RenderMain()
     local block = ns.Apply.BlockReason()
 
     local specName = specID and select(2, GetSpecializationInfoForSpecID(specID))
-    main.title:SetText("SquizzTalents" .. (specName and ("  |cffaaaaaa" .. specName .. "|r") or ""))
+    main.title:SetText("SquizzTalents" .. (specName and ("  " .. S.AccentCode() .. specName .. "|r") or ""))
 
     local ctx = ns.Reminder.GetContext()
     local suggestedID
@@ -513,7 +493,7 @@ local function RenderMain()
 
     local contextHeight = main.context:GetText() ~= "" and (main.context:GetStringHeight() + 6) or 0
     local extra = (main.block:GetText() ~= "" and 18 or 0) + (lastStatusLine and 30 or 0)
-    main:SetHeight(30 + contextHeight + contentHeight + cleanupHeight + extra + 44)
+    main:SetHeight(TOP + 4 + contextHeight + contentHeight + cleanupHeight + extra + 44)
 end
 
 function UI.Toggle()
@@ -531,17 +511,11 @@ local function CreatePopup()
     popup:SetSize(400, 200)
     popup:SetPoint("TOP", 0, -140)
     StyleWindow(popup)
-    popup:SetBackdropBorderColor(1, 0.82, 0, 0.9)
     popup:Hide()
     popup.closeButton:SetScript("OnClick", function() UI.DismissReminder() end)
 
-    popup.title = MakeText(popup, "GameFontNormalLarge")
-    popup.title:SetPoint("TOPLEFT", 10, -10)
-    popup.title:SetPoint("RIGHT", -28, 0)
-    popup.title:SetWordWrap(false)
-
     popup.sub = MakeText(popup, "GameFontHighlightSmall")
-    popup.sub:SetPoint("TOPLEFT", popup.title, "BOTTOMLEFT", 0, -4)
+    popup.sub:SetPoint("TOPLEFT", 10, -TOP)
     popup.sub:SetPoint("RIGHT", -10, 0)
     popup.sub:SetWordWrap(true)
 
@@ -556,10 +530,8 @@ local function CreatePopup()
     popup.block:SetPoint("RIGHT", -8, 0)
     popup.block:SetTextColor(1, 0.5, 0.3)
 
-    popup.later = CreateFrame("Button", nil, popup, "UIPanelButtonTemplate")
-    popup.later:SetSize(80, 22)
+    popup.later = S.Button(popup, L["Not now"], 80, 22)
     popup.later:SetPoint("BOTTOMRIGHT", -8, 8)
-    popup.later:SetText(L["Not now"])
     popup.later:SetScript("OnClick", function() UI.DismissReminder() end)
 
     -- "Remember for" dropdown: which mapping a click on a build saves. A radio
@@ -616,7 +588,7 @@ function UI.RenderReminder()
     ns.Sources.Annotate(data.list)
     local block = ns.Apply.BlockReason()
 
-    popup.title:SetText(ctx.labels[ctx.keys[1]])
+    popup.title:SetText(S.AccentCode() .. L["Talents:"] .. "|r " .. ctx.labels[ctx.keys[1]])
     if data.suggestion then
         popup.sub:SetText(string.format(L["Your build for this content is \"%s\", but it isn't active."],
             data.suggestion.name))
@@ -650,7 +622,7 @@ function UI.RenderReminder()
     local contentHeight = math.max(n, 1) * ROW_HEIGHT
     popup.content:SetHeight(contentHeight)
     local extra = (block and 18 or 0) + (popup.statusLine and 20 or 0)
-    popup:SetHeight(34 + popup.sub:GetStringHeight() + 12 + contentHeight + extra + 44)
+    popup:SetHeight(TOP + popup.sub:GetStringHeight() + 12 + contentHeight + extra + 44)
 end
 
 function UI.ShowReminder(data)

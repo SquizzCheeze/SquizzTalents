@@ -41,5 +41,5 @@ read_globals = {
 
     -- Frames, fonts and constants
     "CANCEL", "CLOSE", "ChatFontNormal", "DELETE", "GameFontHighlight", "GameTooltip", "OKAY", "REMOVE",
-    "SAVE", "UIParent",
+    "SAVE", "UIParent", "RAID_CLASS_COLORS", "SOUNDKIT", "PlaySound", "UnitClass",
 }

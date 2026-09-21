@@ -11,7 +11,6 @@ local L = ns.L
 local Transfer = {}
 ns.Transfer = Transfer
 
-local WHITE8 = "Interface\\Buttons\\WHITE8x8"
 
 -- ---------------------------------------------------------------------------
 -- Parsing / validation
@@ -256,66 +255,43 @@ local function NameOrDefault()
 end
 
 local function Build()
+    local S = ns.Style
     dialog = CreateFrame("Frame", "SquizzTalentsImportFrame", UIParent, "BackdropTemplate")
     dialog:SetSize(420, 214)
     dialog:SetPoint("CENTER", 0, 80)
-    dialog:SetFrameStrata("DIALOG")
+    S.Window(dialog, L["Import talent build"])
     dialog:SetToplevel(true)
-    dialog:SetBackdrop({ bgFile = WHITE8, edgeFile = WHITE8, edgeSize = 1 })
-    dialog:SetBackdropColor(0.06, 0.06, 0.08, 0.97)
-    dialog:SetBackdropBorderColor(0.2, 0.8, 0.6, 0.8)
-    dialog:EnableMouse(true)
-    dialog:SetMovable(true)
-    dialog:SetClampedToScreen(true)
-    dialog:RegisterForDrag("LeftButton")
-    dialog:SetScript("OnDragStart", dialog.StartMoving)
-    dialog:SetScript("OnDragStop", dialog.StopMovingOrSizing)
     dialog:Hide()
     tinsert(UISpecialFrames, "SquizzTalentsImportFrame")
 
-    local close = CreateFrame("Button", nil, dialog, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", 2, 2)
-
-    local title = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 12, -12)
-    title:SetText(L["Import talent build"])
-
     local codeLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    codeLabel:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -14)
+    codeLabel:SetPoint("TOPLEFT", 12, -(S.TITLE_HEIGHT + 10))
     codeLabel:SetText(L["Talent code:"])
 
-    dialog.code = CreateFrame("EditBox", nil, dialog, "InputBoxTemplate")
-    dialog.code:SetSize(390, 22)
-    dialog.code:SetPoint("TOPLEFT", codeLabel, "BOTTOMLEFT", 6, -2)
-    dialog.code:SetAutoFocus(false)
+    dialog.code = S.EditBox(dialog, 396, 22)
+    dialog.code:SetPoint("TOPLEFT", codeLabel, "BOTTOMLEFT", 0, -3)
     dialog.code:SetMaxLetters(4000)
     dialog.code:SetScript("OnTextChanged", Validate)
     dialog.code:SetScript("OnEscapePressed", function() dialog:Hide() end)
 
     dialog.status = dialog:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    dialog.status:SetPoint("TOPLEFT", dialog.code, "BOTTOMLEFT", -6, -4)
+    dialog.status:SetPoint("TOPLEFT", dialog.code, "BOTTOMLEFT", 0, -4)
     dialog.status:SetPoint("RIGHT", -12, 0)
     dialog.status:SetJustifyH("LEFT")
     dialog.status:SetWordWrap(true)
 
     local nameLabel = dialog:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    nameLabel:SetPoint("TOPLEFT", dialog.code, "BOTTOMLEFT", -6, -40)
+    nameLabel:SetPoint("TOPLEFT", dialog.code, "BOTTOMLEFT", 0, -40)
     nameLabel:SetText(L["Name:"])
 
-    dialog.name = CreateFrame("EditBox", nil, dialog, "InputBoxTemplate")
-    dialog.name:SetSize(390, 22)
-    dialog.name:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 6, -2)
-    dialog.name:SetAutoFocus(false)
+    dialog.name = S.EditBox(dialog, 396, 22)
+    dialog.name:SetPoint("TOPLEFT", nameLabel, "BOTTOMLEFT", 0, -3)
     dialog.name:SetMaxLetters(48)
     dialog.name:SetScript("OnEscapePressed", function() dialog:Hide() end)
 
-    dialog.toOwn = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
-    dialog.toOwn:SetSize(190, 24)
+    dialog.toOwn = S.Button(dialog, L["Save to SquizzTalents"], 194, 24, "accent")
     dialog.toOwn:SetPoint("BOTTOMLEFT", 12, 12)
-    dialog.toOwn:SetText(L["Save to SquizzTalents"])
-    dialog.toOwn:SetMotionScriptsWhileDisabled(true)
-    dialog.toOwn:SetScript("OnEnter", ButtonTooltip)
-    dialog.toOwn:SetScript("OnLeave", GameTooltip_Hide)
+    dialog.toOwn.tooltipFunc = ButtonTooltip
     dialog.toOwn:SetScript("OnClick", function()
         if not dialog.info then return end
         local name = NameOrDefault()
@@ -325,13 +301,9 @@ local function Build()
         ns.UI.RefreshAll()
     end)
 
-    dialog.toBlizz = CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
-    dialog.toBlizz:SetSize(190, 24)
+    dialog.toBlizz = S.Button(dialog, L["Create Blizzard loadout"], 194, 24)
     dialog.toBlizz:SetPoint("BOTTOMRIGHT", -12, 12)
-    dialog.toBlizz:SetText(L["Create Blizzard loadout"])
-    dialog.toBlizz:SetMotionScriptsWhileDisabled(true)
-    dialog.toBlizz:SetScript("OnEnter", ButtonTooltip)
-    dialog.toBlizz:SetScript("OnLeave", GameTooltip_Hide)
+    dialog.toBlizz.tooltipFunc = ButtonTooltip
     dialog.toBlizz:SetScript("OnClick", function()
         if not dialog.info then return end
         local name = NameOrDefault()

@@ -80,7 +80,6 @@ end
 
 -- Narrower than the frame by the scroll bar's gutter.
 local BODY_WIDTH = 404
-local WHITE8 = "Interface\\Buttons\\WHITE8x8"
 
 local frame
 
@@ -99,9 +98,8 @@ local function BuildFrame()
     frame:Hide()
     frame:SetToplevel(true)
     frame:HookScript("OnHide", OnNotesHidden)
-    frame:SetBackdrop({ bgFile = WHITE8, edgeFile = WHITE8, edgeSize = 1 })
-    frame:SetBackdropColor(0.09, 0.09, 0.09, 0.96)
-    frame:SetBackdropBorderColor(0.2, 0.8, 0.6, 0.8)
+    -- Same colours as SquizzFrames' notes window (W.StylizeFrame there).
+    ns.Style.Backdrop(frame, { 0.09, 0.09, 0.09, 0.96 }, { 0, 0, 0, 1 })
 
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", frame, "TOPLEFT", 18, -16)
@@ -128,19 +126,15 @@ local function BuildFrame()
     body:SetTextColor(0.78, 0.78, 0.78, 1)
     frame.body = body
 
-    local openBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    openBtn:SetSize(150, 26)
+    local openBtn = ns.Style.Button(frame, L["Open SquizzTalents"], 150, 26)
     openBtn:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 18, 16)
-    openBtn:SetText(L["Open SquizzTalents"])
     openBtn:SetScript("OnClick", function()
         frame:Hide()
         ns.UI.Toggle()
     end)
 
-    local closeBtn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    closeBtn:SetSize(90, 26)
+    local closeBtn = ns.Style.Button(frame, CLOSE, 90, 26)
     closeBtn:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -18, 16)
-    closeBtn:SetText(CLOSE)
     closeBtn:SetScript("OnClick", function() frame:Hide() end)
 
     return frame

@@ -49,6 +49,9 @@ Reminders:
 
 Other:
 
+- Styled to match SquizzFrames: dark flat windows with a title bar, flat
+  buttons, switches and highlights in your class colour.
+
 - Settings page under Options > AddOns > SquizzTalents (/sqt config):
   reminder switches and your content choices for the current spec.
 - Release notes once per update, shared with the other Squizz addons so they

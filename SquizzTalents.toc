@@ -8,6 +8,7 @@
 ## SavedVariables: SquizzTalentsDB
 
 Locales.lua
+Style.lua
 Core.lua
 Store.lua
 Sources.lua

@@ -42,10 +42,8 @@ local function RenderMappings()
             row.text:SetPoint("RIGHT", -90, 0)
             row.text:SetJustifyH("LEFT")
             row.text:SetWordWrap(false)
-            row.remove = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-            row.remove:SetSize(80, 20)
+            row.remove = ns.Style.Button(row, REMOVE, 80, 20, "red")
             row.remove:SetPoint("RIGHT")
-            row.remove:SetText(REMOVE)
             mappingRows[i] = row
         end
         local target = names[item.entryID] or ("|cffff6666" .. L["missing build"] .. "|r")
@@ -65,31 +63,27 @@ local function Build()
     panel = CreateFrame("Frame")
     panel:Hide()
 
-    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+    local S = ns.Style
+    local title = panel:CreateFontString(nil, "OVERLAY")
+    S.Font(title, 20)
     title:SetPoint("TOPLEFT", 16, -16)
-    title:SetText("SquizzTalents")
+    title:SetText("Squizz" .. S.AccentCode() .. "Talents|r")
 
     local prev = title
     for i, t in ipairs(TOGGLES) do
-        local cb = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
-        cb:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", i == 1 and 0 or 0, i == 1 and -12 or -2)
-        cb.Text:SetFontObject(GameFontHighlight)
-        cb.Text:SetText(t.label)
-        cb:SetScript("OnClick", function(self)
-            ns.Store.SetSetting(t.key, self:GetChecked() and true or false)
-        end)
+        local cb = S.Toggle(panel, t.label, function(on) ns.Store.SetSetting(t.key, on) end)
+        cb:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, i == 1 and -16 or -10)
         checkboxes[t.key] = cb
         prev = cb
     end
 
-    local open = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    open:SetSize(180, 22)
-    open:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 4, -10)
-    open:SetText(L["Open loadout window"])
+    local open = S.Button(panel, L["Open loadout window"], 180, 22)
+    open:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -16)
     open:SetScript("OnClick", function() ns.UI.Toggle() end)
 
-    panel.mapTitle = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    panel.mapTitle:SetPoint("TOPLEFT", open, "BOTTOMLEFT", -4, -24)
+    panel.mapTitle = panel:CreateFontString(nil, "OVERLAY")
+    S.Font(panel.mapTitle, 14, S.Accent().r, S.Accent().g, S.Accent().b)
+    panel.mapTitle:SetPoint("TOPLEFT", open, "BOTTOMLEFT", 0, -24)
 
     local hint = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     hint:SetPoint("LEFT", panel.mapTitle, "RIGHT", 12, 0)
