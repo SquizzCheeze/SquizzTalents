@@ -2,6 +2,18 @@ SquizzTalents - Changelog
 =========================
 
 
+V1.0.1
+------
+
+Fixed:
+
+- Entering a delve could still miss the reminder. The game can report the delve
+  well after the loading screen -- later than the 15 seconds the entry check
+  kept retrying for. The check now also runs whenever the zone or scenario
+  changes, so it fires as soon as the game knows where you are, and still
+  decides only once per entry.
+
+
 V1.0 (2026-09-21)
 -----------------
 

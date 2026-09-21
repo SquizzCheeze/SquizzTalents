@@ -129,11 +129,13 @@ local function InstanceSnapshot()
         tostring(delve))
 end
 
--- Returns the reason (nil when the popup was shown / queued).
-function Reminder.Check(trigger, attempt)
+-- Returns the reason (nil when the popup was shown / queued). `label` only
+-- names the attempt in /sqt debug; `trigger` drives behaviour ("enter" is the
+-- one that honours Not now), so the two must stay separate.
+function Reminder.Check(trigger, label)
     local data, reason = Reminder.Evaluate(trigger)
     Reminder.lastEvaluation = {
-        trigger = attempt and string.format("%s #%d", trigger, attempt) or trigger,
+        trigger = label or trigger,
         reason = reason or "shown",
         at = GetTime(),
         snapshot = InstanceSnapshot(),
@@ -153,26 +155,65 @@ end
 -- ---------------------------------------------------------------------------
 -- Triggers
 -- ---------------------------------------------------------------------------
--- Instance info settles some time after the loading screen, and how long
--- varies: a delve still read as "not relevant content" 3s in. So retry until
--- the game reports content we care about, then stop -- whatever the decision,
--- one decision per entry. A newer load cancels an older chain.
+-- The entry reminder: one decision per piece of content per entry.
+--
+-- Instance info arrives late and by no fixed deadline. A delve read as open
+-- world 3s in (fixed by retrying), then still read as open world at 15s -- the
+-- game only reported it once the delve's scenario started. Timers alone
+-- cannot win that race, so the check is ALSO driven by the events that fire
+-- when the zone or scenario changes, and whichever sees the content first
+-- decides. `decidedKey` is the content already decided for this entry, so
+-- repeat events inside the same instance do nothing; a new load clears it,
+-- so re-entering the same delve asks again.
 local ENTER_DELAYS = { 3, 8, 15 }
+local decidedKey = nil
 local enterToken = 0
 
+-- Returns true once the current content has been decided (or needs none).
+local function CheckEntry(label)
+    if not ns.Store.Setting("remindOnEnter") then return true end
+    local ctx = Reminder.GetContext()
+    if not ctx then
+        -- Left relevant content: a later entry is a new decision.
+        decidedKey = nil
+        return false
+    end
+    if ctx.keys[1] == decidedKey then return true end
+    decidedKey = ctx.keys[1]
+    Reminder.Check("enter", label)
+    return true
+end
+
 ns.On("PLAYER_ENTERING_WORLD", function()
-    if not ns.Store.Setting("remindOnEnter") then return end
+    decidedKey = nil
     enterToken = enterToken + 1
     local token = enterToken
     local function Attempt(i)
         if token ~= enterToken then return end
-        local reason = Reminder.Check("enter", i)
-        if reason == "not relevant content" and ENTER_DELAYS[i + 1] then
+        if CheckEntry(string.format("enter #%d", i)) then return end
+        -- Nothing recognised yet: note what the game reported, for /sqt debug.
+        Reminder.Check("enter", string.format("enter #%d", i))
+        if ENTER_DELAYS[i + 1] then
             C_Timer.After(ENTER_DELAYS[i + 1] - ENTER_DELAYS[i], function() Attempt(i + 1) end)
         end
     end
     C_Timer.After(ENTER_DELAYS[1], function() Attempt(1) end)
 end)
+
+-- Zone and scenario changes: the late signal that a delve (or any instance)
+-- is now known. Debounced, since these can arrive in bursts.
+local eventQueued = false
+local function OnContentEvent(event)
+    if eventQueued then return end
+    eventQueued = true
+    C_Timer.After(1, function()
+        eventQueued = false
+        CheckEntry("enter (" .. event .. ")")
+    end)
+end
+for _, event in ipairs({ "ZONE_CHANGED_NEW_AREA", "SCENARIO_UPDATE", "ACTIVE_DELVE_DATA_UPDATE" }) do
+    ns.On(event, function() OnContentEvent(event) end)
+end
 
 ns.On("CHALLENGE_MODE_KEYSTONE_SLOTTED", function()
     if ns.Store.Setting("remindOnKeystone") then Reminder.Check("keystone") end
