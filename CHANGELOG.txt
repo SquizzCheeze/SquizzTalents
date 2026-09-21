@@ -1,0 +1,62 @@
+SquizzTalents - Changelog
+=========================
+
+
+V0.4
+----
+
+New:
+
+- Release notes window, once per update, like the other Squizz addons. It
+  shares their queue, so notes from several addons updating at once appear one
+  after another instead of on top of each other. /sqt notes shows them again.
+
+Changed:
+
+- The reminder's Remember control is a dropdown instead of a button that cycled
+  through options. It opens on the mapping that actually triggered the reminder
+  (it used to say "off" even when "All dungeons" was saved), and every option
+  names the build it currently points at.
+
+
+V0.3
+----
+
+New:
+
+- Saved builds made on an older talent tree are marked Outdated, with the reason
+  in the tooltip. Checked from the build's header only, so it costs nothing.
+- Update to current talents (right-click): overwrites a saved build with your
+  active talents and keeps its name, icon, tags and content mappings.
+- Delete outdated: removes every outdated saved build for your spec at once.
+- Blizzard loadouts can be deleted from the right-click menu. Blizzard's talent
+  window only notices while it is open; if it still lists a deleted loadout,
+  /reload.
+- /sqt testoutdated saves a deliberately outdated copy of your build, for
+  testing the above without waiting for a patch.
+
+
+V0.2
+----
+
+New:
+
+- Reminder popup on entering a dungeon, raid, delve, battleground or arena, on
+  slotting a keystone, and on a ready check. It only appears when your active
+  build is not the one chosen for that content, never during an active key, and
+  waits for combat to end.
+- Content mappings: one difficulty of an instance, the whole instance, or every
+  dungeon / raid / delve / battleground / arena. Set from the reminder or by
+  right-clicking a build.
+- Right-click menu: apply, use for this content, tags, icon, rename, delete.
+- Settings page (Options > AddOns > SquizzTalents, or /sqt config): reminder
+  switches and the mapping list for your spec.
+- /sqt remind runs the reminder check on demand.
+
+
+V0.1
+----
+
+- First version: one list of your Blizzard loadouts and your own saved builds,
+  with no cap on how many you save. Click to apply; the result is confirmed by
+  the game rather than assumed. /sqt debug for a copyable diagnostic dump.

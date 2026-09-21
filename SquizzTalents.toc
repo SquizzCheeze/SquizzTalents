@@ -1,0 +1,18 @@
+## Interface: 120100, 120105
+## Title: SquizzTalents
+## Notes: Talent loadout manager with content-aware reminders. /sqt
+## Author: Squizz
+## Version: 0.4
+## X-Flavor: Mainline
+## SavedVariables: SquizzTalentsDB
+
+Locales.lua
+Core.lua
+Store.lua
+Sources.lua
+Apply.lua
+Reminder.lua
+UI.lua
+Settings.lua
+Welcome.lua
+Debug.lua
