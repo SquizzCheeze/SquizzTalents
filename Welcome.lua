@@ -19,23 +19,16 @@ ns.Welcome = Welcome
 -- ADD A NEW ENTRY AS PART OF RELEASING. A version with no entry still shows
 -- the update window, just without bullets.
 local RELEASE_NOTES = {
-    ["0.4"] = {
-        "The reminder's Remember setting is now a dropdown that shows what is actually saved. It opens on the mapping "
-            .. "that triggered the reminder, and each option names the build it currently points at.",
-        "Release notes like this one, once per update. /sqt notes shows them again.",
-    },
-    ["0.3"] = {
-        "Saved builds made on an older talent tree are marked Outdated. Right-click > Update to current talents "
-            .. "refreshes one and keeps its name, icon, tags and mappings.",
-        "Delete outdated removes every outdated build for your spec in one go.",
-        "Blizzard loadouts can be deleted from the right-click menu.",
-    },
-    ["0.2"] = {
-        "A reminder pops up when you enter a dungeon, raid, delve or PvP instance, slot a keystone, or on a ready "
-            .. "check -- but only when your active build is not the one you chose for that content.",
-        "Map builds to content from the reminder or by right-clicking a build: one difficulty, the whole instance, "
-            .. "or every dungeon/raid/delve.",
-        "Tags, icons and renaming from the right-click menu, and a settings page under Options > AddOns.",
+    ["1.0"] = {
+        "First release. Your Blizzard loadouts and your own saved builds in one list, with no cap on how many "
+            .. "you save. Click one to apply it.",
+        "A reminder when you enter a dungeon, raid, delve or PvP instance, slot a keystone, or on a ready check -- "
+            .. "only when your active build is not the one you chose for that content.",
+        "Choose builds for content from the reminder or by right-clicking a build: one difficulty, the whole "
+            .. "instance, or every dungeon/raid/delve.",
+        "Builds made on an older talent tree are marked Outdated; right-click > Update to current talents "
+            .. "refreshes one and keeps its name, tags and mappings.",
+        "Settings under Options > AddOns > SquizzTalents, or /sqt config.",
     },
 }
 

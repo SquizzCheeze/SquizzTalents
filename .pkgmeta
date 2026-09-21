@@ -1,0 +1,35 @@
+# Packaging metadata for BigWigsMods/packager, used by the release workflow in
+# .github/workflows/release.yml.
+#
+# The addon folder must be named SquizzTalents when installed -- this is what
+# names the folder inside the zip.
+package-as: SquizzTalents
+
+# Upload the hand-written changelog as the release notes rather than a list of
+# commit messages.
+#
+# Note this sends the WHOLE file -- every version, newest first -- not just the
+# section for the version being released. That is how manual-changelog works;
+# the alternative is auto-generated commit messages, which are much less useful
+# to players.
+manual-changelog:
+  filename: CHANGELOG.txt
+  markup-type: text
+
+# Development-only files, kept out of the zip so they never ship to users.
+# CHANGELOG.txt is deliberately NOT here: it is worth having offline.
+ignore:
+  - .github
+  - .vscode
+  - .claude
+  - .tools
+  - .gitignore
+  - .gitattributes
+  - .pkgmeta
+  - CLAUDE.md
+  - README.md
+  - .luacheckrc
+
+# No libraries at all, so there is nothing to check out and no
+# separate no-libraries package to build.
+enable-nolib-creation: no

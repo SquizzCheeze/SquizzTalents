@@ -2,68 +2,48 @@ SquizzTalents - Changelog
 =========================
 
 
-V0.4
+V1.0
 ----
 
-New:
+First release.
 
-- Release notes window, once per update, like the other Squizz addons. It
-  shares their queue, so notes from several addons updating at once appear one
-  after another instead of on top of each other. /sqt notes shows them again.
+Loadouts:
 
-Changed:
+- One list of your Blizzard loadouts and your own saved builds. Blizzard
+  loadouts are read live from the game and never copied; your own builds are
+  stored as talent import strings, so there is no cap on how many you keep.
+- Click a build to apply it. The result is confirmed by the game rather than
+  assumed, and anything that could not be applied is reported. Applying is
+  refused, with the reason shown, in combat, during an active Mythic+ key, or
+  whenever the game says talents cannot be changed.
+- Save current build, and a right-click menu for every build: apply, use for
+  this content, tags, icon, rename, delete. Blizzard loadouts can be deleted
+  from here too (Blizzard's talent window only notices while it is open; if it
+  still lists a deleted loadout, /reload).
+- Saved builds made on an older talent tree are marked Outdated, with the
+  reason in the tooltip. Update to current talents refreshes one with your
+  active talents and keeps its name, icon, tags and content mappings. Delete
+  outdated removes every outdated build for your spec at once.
 
-- The reminder's Remember control is a dropdown instead of a button that cycled
-  through options. It opens on the mapping that actually triggered the reminder
-  (it used to say "off" even when "All dungeons" was saved), and every option
-  names the build it currently points at.
+Reminders:
 
-Fixed:
-
-- Entering a delve could miss the reminder: the game had not reported the delve
-  yet when the check ran, 3 seconds after loading. The check now retries at 8 and
-  15 seconds until the content is recognised, and /sqt debug records what the
-  game reported at each attempt.
-
-
-V0.3
-----
-
-New:
-
-- Saved builds made on an older talent tree are marked Outdated, with the reason
-  in the tooltip. Checked from the build's header only, so it costs nothing.
-- Update to current talents (right-click): overwrites a saved build with your
-  active talents and keeps its name, icon, tags and content mappings.
-- Delete outdated: removes every outdated saved build for your spec at once.
-- Blizzard loadouts can be deleted from the right-click menu. Blizzard's talent
-  window only notices while it is open; if it still lists a deleted loadout,
-  /reload.
-- /sqt testoutdated saves a deliberately outdated copy of your build, for
-  testing the above without waiting for a patch.
-
-
-V0.2
-----
-
-New:
-
-- Reminder popup on entering a dungeon, raid, delve, battleground or arena, on
+- A reminder on entering a dungeon, raid, delve, battleground or arena, on
   slotting a keystone, and on a ready check. It only appears when your active
-  build is not the one chosen for that content, never during an active key, and
-  waits for combat to end.
-- Content mappings: one difficulty of an instance, the whole instance, or every
-  dungeon / raid / delve / battleground / arena. Set from the reminder or by
-  right-clicking a build.
-- Right-click menu: apply, use for this content, tags, icon, rename, delete.
-- Settings page (Options > AddOns > SquizzTalents, or /sqt config): reminder
-  switches and the mapping list for your spec.
-- /sqt remind runs the reminder check on demand.
+  build is not the one chosen for that content, never during an active key,
+  and waits for combat to end.
+- Choose builds per content: one difficulty of an instance, the whole
+  instance, or every dungeon / raid / delve / battleground / arena. The most
+  specific choice wins. Set it from the reminder's "Remember for" dropdown or
+  by right-clicking a build.
+- The entry check retries for up to 15 seconds after loading, because some
+  content (delves especially) is reported late.
 
+Other:
 
-V0.1
-----
-
-- First version: one list of your Blizzard loadouts and your own saved builds,
-  with no cap on how many you save. Click to apply; the result is confirmed by
-  the game rather than assumed. /sqt debug for a copyable diagnostic dump.
+- Settings page under Options > AddOns > SquizzTalents (/sqt config):
+  reminder switches and your content choices for the current spec.
+- Release notes once per update, shared with the other Squizz addons so they
+  queue instead of overlapping. /sqt notes shows them again.
+- /sqt debug opens a copyable diagnostic dump. /sqt remind runs the reminder
+  check on demand; /sqt testoutdated saves a deliberately outdated build for
+  testing.
