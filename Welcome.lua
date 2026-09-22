@@ -19,6 +19,12 @@ ns.Welcome = Welcome
 -- ADD A NEW ENTRY AS PART OF RELEASING. A version with no entry still shows
 -- the update window, just without bullets.
 local RELEASE_NOTES = {
+    ["1.1"] = {
+        "The loadout window now opens beside Blizzard's talent window and closes with it. Opened on its own "
+            .. "with /sqt it floats freely and remembers where you put it. You can switch this off in Settings.",
+        "Fixed a build you had just applied showing as not active, which made the reminder ask you to switch "
+            .. "to it every time you entered a dungeon or delve.",
+    },
     ["1.0"] = {
         "First release. Your Blizzard loadouts and your own saved builds in one list, with no cap on how many "
             .. "you save. Click one to apply it.",
