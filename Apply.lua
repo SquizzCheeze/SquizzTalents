@@ -105,6 +105,63 @@ local function ReadContent(stream, treeNodes)
 end
 Apply.ReadContent = ReadContent
 
+-- What a build IS, for "is this the active one": the spec plus every talent
+-- the player bought (node, ranks, choice). Nil if the string is unreadable.
+--
+-- Comparing whole export strings is not enough. Blizzard's writer
+-- (WriteLoadoutContent) also records GRANTED nodes -- selected, not
+-- purchased -- and what the game grants is not fixed, so two strings for the
+-- exact same picks can differ in those bits. That is how an applied build
+-- read as "not active" everywhere and the entry reminder nagged on every
+-- dungeon (user report 2026-09-22). Granted nodes cost nothing and are not a
+-- choice, so they are left out entirely.
+local signatureCache = {}
+function Apply.Signature(importString)
+    if not importString then return nil end
+    local cached = signatureCache[importString]
+    if cached then return cached end
+    -- Failures are not cached: tree data can be missing briefly at login.
+    local sig = nil
+    local stream = ExportUtil.MakeImportDataStream(importString)
+    local version, specID = ReadHeader(stream)
+    local treeID = version and version == C_Traits.GetLoadoutSerializationVersion()
+        and C_ClassTalents.GetTraitTreeForSpec(specID)
+    if treeID then
+        local treeNodes = C_Traits.GetTreeNodes(treeID)
+        local ok, content = pcall(ReadContent, stream, treeNodes)
+        if ok then
+            local parts = {}
+            for i, nodeID in ipairs(treeNodes) do
+                local r = content[i]
+                if r.selected and r.purchased then
+                    parts[#parts + 1] = string.format("%d:%s:%d", nodeID,
+                        tostring(r.partialRanks or "max"), r.choiceIndex or 0)
+                end
+            end
+            sig = specID .. "|" .. table.concat(parts, ",")
+        end
+    end
+    signatureCache[importString] = sig
+    return sig
+end
+
+-- For /sqt debug: how many purchased talents differ between two signatures,
+-- and the first few of them.
+function Apply.SignatureDiff(a, b)
+    if not a or not b then return nil end
+    local function Set(sig)
+        local set = {}
+        for part in (sig:match("|(.*)$") or ""):gmatch("[^,]+") do set[part] = true end
+        return set
+    end
+    local sa, sb = Set(a), Set(b)
+    local diff = {}
+    for part in pairs(sa) do if not sb[part] then diff[#diff + 1] = "-" .. part end end
+    for part in pairs(sb) do if not sa[part] then diff[#diff + 1] = "+" .. part end end
+    table.sort(diff)
+    return #diff, table.concat(diff, " ", 1, math.min(#diff, 6))
+end
+
 -- Why a saved build can no longer be applied as saved, or nil if it still can.
 -- Header only (26 bytes), cheap enough to run on every render. Catches a talent
 -- format change and a changed talent tree -- the patch-day case. It cannot

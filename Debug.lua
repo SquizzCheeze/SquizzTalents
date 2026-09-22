@@ -58,6 +58,12 @@ function Debug.BuildText()
             e.source, tostring(e.name), tostring(e.specID), tostring(e.configID), tostring(e.isActive),
             tostring(e.duplicateOf), table.concat(e.tags, ","))
         add("   string=%s stale=%s", Short(e.importStringResolved), tostring(e.staleReason))
+        -- Why an entry does not count as active: which purchased talents differ.
+        if not e.isActive then
+            local n, sample = ns.Apply.SignatureDiff(e.signature, ns.Apply.Signature(current))
+            add("   vs active: %s", n and string.format("%d talents differ  %s", n, sample)
+                or "unreadable (signature=" .. tostring(e.signature ~= nil) .. ")")
+        end
     end
 
     add("")

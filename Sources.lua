@@ -263,16 +263,20 @@ end
 -- Returns the active export string.
 function Sources.Annotate(list)
     local current = Sources.GetActiveImportString()
+    -- Matched on purchased talents, not the raw string; see Apply.Signature.
+    local currentSig = ns.Apply.Signature(current)
     local blizzByString = {}
     for _, e in ipairs(list) do
         e.importStringResolved = Sources.GetEntryImportString(e)
-        e.isActive = current ~= nil and e.importStringResolved == current
-        if e.source == "blizz" and e.importStringResolved then
-            blizzByString[e.importStringResolved] = blizzByString[e.importStringResolved] or e
+        e.signature = ns.Apply.Signature(e.importStringResolved)
+        e.isActive = current ~= nil and (e.importStringResolved == current
+            or (currentSig ~= nil and e.signature == currentSig))
+        if e.source == "blizz" and e.signature then
+            blizzByString[e.signature] = blizzByString[e.signature] or e
         end
     end
     for _, e in ipairs(list) do
-        local twin = e.source == "own" and e.importStringResolved and blizzByString[e.importStringResolved]
+        local twin = e.source == "own" and e.signature and blizzByString[e.signature]
         e.duplicateOf = twin and twin.id or nil
         e.duplicateName = twin and twin.name or nil
         -- Blizzard's talent window validates its own loadouts; only ours need it.

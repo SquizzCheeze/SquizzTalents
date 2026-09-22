@@ -99,9 +99,9 @@ function Reminder.Evaluate(trigger)
     end
 
     if suggestion then
-        -- Compare export strings, so an own build identical to the active
-        -- Blizzard loadout counts as a match too.
-        if suggestion.importStringResolved == current then return nil, "already matching" end
+        -- Annotate's match, so an own build identical to the active Blizzard
+        -- loadout counts too. Not a raw string compare: see Apply.Signature.
+        if suggestion.isActive then return nil, "already matching" end
     else
         if not ns.Store.Setting("remindUnmapped") then return nil, "unmapped" end
     end

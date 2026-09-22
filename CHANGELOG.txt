@@ -14,6 +14,14 @@ New:
   remembers where you dragged it. The reminder popup is unaffected. Switch it
   off under Settings.
 
+Fixed:
+
+- A build you had just applied could show as not active anywhere, so the
+  reminder asked you to switch to it every time you entered a dungeon or
+  delve. Builds are now matched on the talents you actually picked, not on
+  the exact text of the talent string, which also records talents the game
+  hands out for free.
+
 
 V1.0 (2026-09-21)
 -----------------
