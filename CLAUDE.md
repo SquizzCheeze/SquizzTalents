@@ -68,10 +68,23 @@ so `ADDON_LOADED` runs `Store.Init` (Core) before `Settings` builds its panel.
   tags, configID?, ownID?, importString? }
 ```
 
-`Sources.Annotate(list)` adds `importStringResolved`, `isActive` (export string ==
-active build's), `duplicateOf`/`duplicateName` (own build identical to a Blizzard
-loadout) and `staleReason` (own builds only). Everything that compares builds
-compares **export strings**.
+`Sources.Annotate(list)` adds `importStringResolved`, `signature`, `isActive`,
+`duplicateOf`/`duplicateName` (own build identical to a Blizzard loadout) and
+`staleReason` (own builds only).
+
+⚠ **BUILDS ARE COMPARED BY SIGNATURE, NOT BY EXPORT STRING** (`Apply.Signature`,
+V1.1). Blizzard's writer (`ClassTalentImportExportMixin:WriteLoadoutContent`)
+records GRANTED nodes too — `isNodeSelected = isNodeGranted or isNodePurchased`,
+with `purchased = 0` for a granted one — and what the game grants is not fixed,
+so two strings for the identical picks can differ. A build the player had just
+applied then read as not active EVERYWHERE, and the entry reminder nagged on
+every dungeon (user report 2026-09-22). `Apply.Signature` reduces a string to
+`specID` plus every node with PURCHASED ranks (`nodeID:ranks:choiceIndex`);
+`isActive`, the reminder's "already matching" and duplicate detection all use it.
+Raw-string equality is still tried first as a fast path. Failures are not cached:
+tree data can be missing for a moment at login. `Apply.SignatureDiff` names the
+differing talents and `/sqt debug` prints them under any entry that is not active
+— the first thing to read on a "it says my build isn't active" report.
 
 - **Blizzard loadouts are read live** (`C_ClassTalents.GetConfigIDsBySpecID` +
   `C_Traits.GetConfigInfo`) and never copied. Only our metadata (tags, icon) is
@@ -141,7 +154,8 @@ path, or `"atlas:<name>"`.
   and `scenario` + (`C_PartyInfo.IsDelveInProgress()` or difficulty 208) → delve.
   Keys, most specific first: `i:<instanceID>:d:<difficultyID>`, `i:<instanceID>`,
   `t:<kind>`.
-- Popup only on a **mismatch** (the mapped build's export string ≠ active), never
+- Popup only on a **mismatch** (the mapped build's signature ≠ active — see
+  `Apply.Signature`, never a raw string compare), never
   during an active key, queued until combat ends and re-evaluated then. Unmapped
   content prompts only with `remindUnmapped` on. "Not now" silences only the
   `enter` trigger for that context, for the session.
