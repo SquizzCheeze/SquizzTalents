@@ -19,6 +19,11 @@ ns.Welcome = Welcome
 -- ADD A NEW ENTRY AS PART OF RELEASING. A version with no entry still shows
 -- the update window, just without bullets.
 local RELEASE_NOTES = {
+    ["1.2"] = {
+        "Builds for individual raid bosses: target a boss (or wipe on it), right-click a build and choose "
+            .. "Use for > Boss. The boss's build beats the raid's, and the reminder offers it on a ready check, "
+            .. "when you target that boss, and after a wipe.",
+    },
     ["1.1"] = {
         "The loadout window now opens beside Blizzard's talent window and closes with it. Opened on its own "
             .. "with /sqt it floats freely and remembers where you put it. You can switch this off in Settings.",

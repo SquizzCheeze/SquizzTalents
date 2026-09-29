@@ -60,12 +60,27 @@ function Reminder.GetContext()
     local instance = string.format("i:%d", instanceID)
     local kindKey = "t:" .. kind
     ctx.keys = { exact, instance, kindKey }
+    -- The instance itself, whatever boss is known: entry decisions and "Not
+    -- now" are about the INSTANCE, and must not change when a boss becomes
+    -- known mid-raid (that would read as entering new content).
+    ctx.baseKey = exact
     local diffText = (ns.IsPlain(difficultyName) and difficultyName ~= "") and difficultyName or nil
     ctx.labels = {
         [exact] = diffText and string.format("%s (%s)", name, diffText) or name,
         [instance] = string.format(L["%s (any difficulty)"], name),
         [kindKey] = KIND_LABELS[kind],
     }
+
+    -- A raid boss we know is next (Reminder.boss, see "Which boss is next"
+    -- below): its key goes FIRST, so a build chosen for that boss wins over
+    -- one for the raid. Any difficulty -- a boss build rarely differs by it.
+    local boss = Reminder.boss
+    if kind == "raid" and boss and boss.instanceID == instanceID then
+        local bossKey = "b:" .. boss.encounterID
+        table.insert(ctx.keys, 1, bossKey)
+        ctx.labels[bossKey] = string.format(L["Boss: %s"], boss.name)
+        ctx.bossKey = bossKey
+    end
     return ctx
 end
 
@@ -98,6 +113,13 @@ function Reminder.Evaluate(trigger)
         if e.id == mappedID then suggestion = e end
     end
 
+    -- The boss trigger (targeting a boss, a wipe) only speaks up for a build
+    -- chosen for THAT boss; the raid's own build was already offered on the
+    -- way in and on ready checks.
+    if trigger == "boss" and (not ctx.bossKey or mappedKey ~= ctx.bossKey) then
+        return nil, "no build for this boss"
+    end
+
     if suggestion then
         -- Annotate's match, so an own build identical to the active Blizzard
         -- loadout counts too. Not a raw string compare: see Apply.Signature.
@@ -106,7 +128,7 @@ function Reminder.Evaluate(trigger)
         if not ns.Store.Setting("remindUnmapped") then return nil, "unmapped" end
     end
 
-    if trigger == "enter" and dismissed[ctx.keys[1]] then return nil, "dismissed" end
+    if trigger == "enter" and dismissed[ctx.baseKey] then return nil, "dismissed" end
 
     return {
         trigger = trigger,
@@ -149,7 +171,7 @@ function Reminder.Check(trigger, label)
 end
 
 function Reminder.Dismiss(ctx)
-    if ctx then dismissed[ctx.keys[1]] = true end
+    if ctx then dismissed[ctx.baseKey] = true end
 end
 
 -- ---------------------------------------------------------------------------
@@ -178,8 +200,8 @@ local function CheckEntry(label)
         decidedKey = nil
         return false
     end
-    if ctx.keys[1] == decidedKey then return true end
-    decidedKey = ctx.keys[1]
+    if ctx.baseKey == decidedKey then return true end
+    decidedKey = ctx.baseKey
     Reminder.Check("enter", label)
     return true
 end
@@ -221,6 +243,102 @@ end)
 
 ns.On("READY_CHECK", function()
     if ns.Store.Setting("remindOnReadyCheck") then Reminder.Check("readycheck") end
+end)
+
+-- ---------------------------------------------------------------------------
+-- Which boss is next (raids)
+-- ---------------------------------------------------------------------------
+-- A per-boss build needs to know the boss BEFORE the pull, with no combat
+-- data (a hard rule of this addon). Two signals qualify:
+--   * targeting the boss out of combat -- the target's name is matched
+--     against the Encounter Journal's bosses (and their creatures) for this
+--     raid;
+--   * ENCOUNTER_END after a WIPE -- you are about to pull that boss again. A
+--     kill clears it: the next boss is not knowable until it is targeted.
+-- Reminder.boss = { instanceID, encounterID, name }; GetContext puts its key
+-- first. encounterID is the DUNGEON encounter id, the one ENCOUNTER_END
+-- gives and EJ_GetEncounterInfo returns 7th, so both signals agree.
+Reminder.boss = nil
+
+local bossCache = {} -- [instanceID] = { byName = {}, byEncounter = {} }
+
+-- The raid's bosses from the Encounter Journal, or nil. Not cached while
+-- empty: the journal can have nothing for a moment after login.
+local function RaidBosses(instanceID)
+    if bossCache[instanceID] then return bossCache[instanceID] end
+    if not (C_EncounterJournal and C_EncounterJournal.GetInstanceForGameMap
+        and EJ_GetEncounterInfoByIndex and EJ_GetEncounterInfo and EJ_GetCreatureInfo) then
+        return nil
+    end
+    local journalInstanceID = C_EncounterJournal.GetInstanceForGameMap(instanceID)
+    if not journalInstanceID or not ns.IsPlain(journalInstanceID) then return nil end
+
+    local bosses = { byName = {}, byEncounter = {} }
+    local i = 1
+    while true do
+        local name, _, journalEncounterID = EJ_GetEncounterInfoByIndex(i, journalInstanceID)
+        if not name or not journalEncounterID then break end
+        local _, _, _, _, _, _, encounterID = EJ_GetEncounterInfo(journalEncounterID)
+        if encounterID and ns.IsPlain(encounterID) and ns.IsPlain(name) then
+            local boss = { encounterID = encounterID, name = name }
+            bosses.byEncounter[encounterID] = boss
+            bosses.byName[name] = boss
+            -- Council fights and bosses with a different unit name: each
+            -- creature of the encounter names it too.
+            local c = 1
+            while true do
+                local _, creatureName = EJ_GetCreatureInfo(c, journalEncounterID)
+                if not creatureName then break end
+                if ns.IsPlain(creatureName) then bosses.byName[creatureName] = boss end
+                c = c + 1
+            end
+        end
+        i = i + 1
+    end
+    if not next(bosses.byEncounter) then return nil end
+    bossCache[instanceID] = bosses
+    return bosses
+end
+
+local function SetBoss(instanceID, encounterID, name, label)
+    local b = Reminder.boss
+    if b and b.instanceID == instanceID and b.encounterID == encounterID then return end
+    Reminder.boss = { instanceID = instanceID, encounterID = encounterID, name = name }
+    if ns.Store.Setting("remindOnBoss") then Reminder.Check("boss", label) end
+end
+
+local function CurrentRaid()
+    local _, instanceType, _, _, _, _, _, instanceID = GetInstanceInfo()
+    if instanceType ~= "raid" or not ns.IsPlain(instanceID) then return nil end
+    return instanceID
+end
+
+ns.On("PLAYER_TARGET_CHANGED", function()
+    if InCombatLockdown() then return end
+    local instanceID = CurrentRaid()
+    if not instanceID or not UnitExists("target") or UnitIsPlayer("target") then return end
+    local name = UnitName("target")
+    -- canaccessvalue as well as IsPlain: the name becomes a table key below,
+    -- and the static checker only recognises the former as a guard.
+    if not ns.IsPlain(name) or (canaccessvalue and not canaccessvalue(name)) then return end
+    local bosses = RaidBosses(instanceID)
+    local boss = bosses and bosses.byName[name]
+    if boss then SetBoss(instanceID, boss.encounterID, boss.name, "boss (target)") end
+end)
+
+ns.On("ENCOUNTER_END", function(encounterID, encounterName, _, _, success)
+    local instanceID = CurrentRaid()
+    if not instanceID or not ns.IsPlain(encounterID) or not ns.IsPlain(success) then return end
+    if success == 1 then
+        local b = Reminder.boss
+        if b and b.encounterID == encounterID then Reminder.boss = nil end
+        return
+    end
+    local bosses = RaidBosses(instanceID)
+    local known = bosses and bosses.byEncounter[encounterID]
+    local name = (known and known.name) or (ns.IsPlain(encounterName) and encounterName) or "?"
+    -- Queued out of combat by Reminder.Check if the wipe is still settling.
+    SetBoss(instanceID, encounterID, name, "boss (wipe)")
 end)
 
 ns.On("CHALLENGE_MODE_START", function()

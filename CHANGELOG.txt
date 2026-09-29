@@ -2,6 +2,22 @@ SquizzTalents - Changelog
 =========================
 
 
+V1.2
+----
+
+New:
+
+- Builds for individual raid bosses. Target a raid boss (or wipe on one)
+  and right-click a build: "Use for" now offers "Boss: <name>" alongside the
+  raid and difficulty choices. A boss's build wins over the raid's, and the
+  reminder offers it on a ready check, when you target that boss, and after
+  a wipe on it. Only the boss's own build triggers those last two, so the
+  raid's build isn't repeated. The next boss is worked out without any
+  combat data: from the boss you target (matched against the Encounter
+  Journal) or the one you just wiped on; a kill clears it until you target
+  the next one. Turn the boss reminders off in Settings if you prefer.
+
+
 V1.1 (2026-09-22)
 -----------------
 

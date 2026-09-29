@@ -11,6 +11,7 @@ local TOGGLES = {
     { key = "remindOnEnter", label = L["Remind when entering a dungeon, raid, delve or PvP instance"] },
     { key = "remindOnKeystone", label = L["Remind when a keystone is slotted"] },
     { key = "remindOnReadyCheck", label = L["Remind on ready check"] },
+    { key = "remindOnBoss", label = L["Remind for a raid boss's own build when you target it or after a wipe"] },
     { key = "remindUnmapped", label = L["Also remind in content that has no build chosen yet"] },
     { key = "attachToTalents", label = L["Open the loadout window beside Blizzard's talent window"],
         apply = function(on) ns.UI.SetAttachToTalents(on) end },

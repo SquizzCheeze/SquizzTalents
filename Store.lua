@@ -49,6 +49,7 @@ Store.DEFAULT_SETTINGS = {
     remindOnEnter = true,
     remindOnKeystone = true,
     remindOnReadyCheck = true,
+    remindOnBoss = true, -- per-boss builds in raids: on targeting the boss, or after a wipe
     remindUnmapped = false, -- also prompt in content with no mapping yet
     attachToTalents = true, -- open the loadout window beside Blizzard's talent tab
 }

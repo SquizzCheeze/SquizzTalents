@@ -169,6 +169,19 @@ path, or `"atlas:<name>"`.
 - `Reminder.Check(trigger, label)`: `trigger` drives behaviour (only `"enter"`
   honours Not now); `label` is only for `/sqt debug`. Merging them once made
   "enter #2" silently bypass Not now.
+- **Per-boss builds (V1.2).** In a raid with a known next boss (`Reminder.boss`),
+  `GetContext` puts `b:<encounterID>` FIRST in `ctx.keys`, so the right-click menu,
+  the popup's "remember for" and Settings' list offer it with no UI code of their
+  own. The boss is found WITHOUT combat data, per the hard rule: targeting it out of
+  combat (target name matched against the Encounter Journal's encounters and their
+  creatures for the raid, via `C_EncounterJournal.GetInstanceForGameMap`), or
+  `ENCOUNTER_END` with `success == 0` (a wipe; a kill clears it). `encounterID` is the
+  DUNGEON encounter id both sources share (`EJ_GetEncounterInfo`'s 7th return). The
+  `"boss"` trigger only fires for a build mapped to that boss (`remindOnBoss`).
+  ⚠ Entry decisions and "Not now" key off `ctx.baseKey` (instance + difficulty), NOT
+  `ctx.keys[1]`: with a boss first, keys[1] changes mid-raid and would read as
+  entering new content. Unverified in game at the time of writing: EJ data being
+  available with the journal UI never opened.
 
 ### Import / export (ImportExport.lua)
 
@@ -302,5 +315,3 @@ version that predates `lastSeenVersion`.
 - Restyle the dropdowns and StaticPopups to match SquizzFrames.
 - Raid boss icons in the picker (the Encounter Journal only gives wide portraits;
   Talent Loadouts Ex hardcodes per-season fileIDs).
-- Per-boss mappings (would need to know the next boss before the pull, without
-  combat data).

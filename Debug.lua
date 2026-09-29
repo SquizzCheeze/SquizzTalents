@@ -41,6 +41,9 @@ function Debug.BuildText()
     else
         add("context: none (not reminder content)")
     end
+    local boss = ns.Reminder.boss
+    add("next boss: %s", boss and string.format("%s (encounter %s, instance %s)", tostring(boss.name),
+        tostring(boss.encounterID), tostring(boss.instanceID)) or "none known")
     local ev = ns.Reminder.lastEvaluation
     add("last reminder check: %s", ev and string.format("%s -> %s (%.0fs ago) [%s]", ev.trigger, ev.reason,
         GetTime() - ev.at, tostring(ev.snapshot)) or "none")
