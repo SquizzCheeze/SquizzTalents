@@ -15,7 +15,9 @@ a reminder on entering content when the active build isn't the one chosen for it
 - **No libraries at all.** Keep it that way unless the user agrees to one (the
   original brief said "ask before adding dependencies").
 - Built from scratch on 2026-09-21 and shipped as V1.0 the same day. The 0.x
-  versions were development builds and never shipped.
+  versions were development builds and never shipped. Latest: **V1.2
+  (2026-09-29, per-boss builds)** -- shipped before it could be tried in a raid,
+  so the first raid report is the real test of it (see the ⚠ under Per-boss builds).
 
 ## Hard constraints (from the original brief — still binding)
 
