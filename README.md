@@ -31,6 +31,9 @@ reminder when your build doesn't match the content you just entered.
   ready check — only when your active build isn't the one you chose for that content
 - Choose builds for one difficulty of an instance, a whole instance, or every dungeon, raid,
   delve, battleground or arena. The most specific choice wins
+- Builds for individual raid bosses: target a boss (or wipe on it) and choose Use for > Boss. The
+  boss's build beats the raid's, and the reminder offers it on a ready check, when you target
+  that boss, and after a wipe
 - Never interrupts an active key, and waits for combat to end
 
 No libraries and no combat data: everything works on your own talent data, out of combat.
